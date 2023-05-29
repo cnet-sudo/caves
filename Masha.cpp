@@ -4,7 +4,7 @@ Masha::Masha() {
 
 	// Свяжем текстуру со спрайтом
 	m_Sprite = sf::Sprite(AssetManager::GetTexture("graphics/mascha.png"));
-	m_JumpDuration = .25;
+	m_JumpDuration = .4;
 }
 
 bool Masha::handleInput() {

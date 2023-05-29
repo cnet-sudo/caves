@@ -49,9 +49,9 @@ void Character::update(float elapsedTime) {
 	m_Feet.width = r.width - 6;
 	m_Feet.height = 1;
 	// Голова
-	m_Head.left = r.left;
-	m_Head.top = r.top + (r.height * .3);
-	m_Head.width = r.width;
+	m_Head.left = r.left+50;
+	m_Head.top = r.top + (r.height * .1);
+	m_Head.width = r.width-100;
 	m_Head.height = 1;
 	// Правый 
 	m_Right.left = r.left + r.width - 2;

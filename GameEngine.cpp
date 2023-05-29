@@ -8,8 +8,8 @@ GameEngine::GameEngine()
 	resolution.y = sf::VideoMode::getDesktopMode().height;
 	m_Window.create(sf::VideoMode(resolution.x, resolution.y), L"Пещеры",sf::Style::Fullscreen);
 	// Инициализировать полноэкранный режим
-	m_MainView.setSize(resolution);
-	m_HudView.reset(sf::FloatRect(0, 0, resolution.x, resolution.y));
+	m_MainView.setSize(1920,1080);
+	m_HudView.reset(sf::FloatRect(0, 0, 1920, 1080));
 	// Инициализировать представления с разделенным	экраном
 	m_LeftView.setViewport(sf::FloatRect(0.001f, 0.001f, 0.498f, 0.998f));
 	m_RightView.setViewport(sf::FloatRect(0.5f, 0.001f, 0.499f, 0.998f));
