@@ -136,8 +136,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AssetManager.cpp" />
+    <ClCompile Include="Bear.cpp" />
+    <ClCompile Include="Character.cpp" />
     <ClCompile Include="GameEngine.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Masha.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="openal32.dll" />
@@ -154,7 +157,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AssetManager.h" />
+    <ClInclude Include="Bear.h" />
+    <ClInclude Include="Character.h" />
     <ClInclude Include="GameEngine.h" />
+    <ClInclude Include="Masha.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
