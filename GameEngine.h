@@ -3,6 +3,7 @@
 #include"AssetManager.h"
 #include "Masha.h"
 #include "Bear.h"
+#include "LevelManager.h"
 
 class GameEngine
 {
@@ -19,6 +20,8 @@ private:
 	// Маша и Медведь
 	Bear m_bear;
 	Masha m_masha;
+	// Класс для управления всеми уровнями
+	LevelManager m_LM;
 	// размер плиток в спрайте
 	const int TILE_SIZE = 50;
 	// четыре вершины четырёх угольника
@@ -51,6 +54,13 @@ private:
 	sf::Time m_GameTimeTotal;
 	// Надо ли начинать заново
 	bool m_NewLevelRequired = true;
+	// Массив вершин для тайлов уровня
+	sf::VertexArray m_VALevel;
+	// Массив 2d с картой уровня 
+	// Указатель на	указатель
+	int** m_ArrayLevel = NULL;
+	// Текстура тайлов уровня Texture
+	sf::Texture m_TextureTiles;
 	// иконка
 	sf::Image m_icon;
 	// Метод обработки событий 
@@ -59,5 +69,10 @@ private:
 	void update(float dtAsSeconds);
 	// Метод отрисовки объектов в графическом окне
 	void draw();
+
+	// Загружаем новый уровень
+	void loadLevel();
+
+	bool detectCollisions(Character& character);
 };
 

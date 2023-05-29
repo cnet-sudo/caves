@@ -139,6 +139,7 @@
     <ClCompile Include="Bear.cpp" />
     <ClCompile Include="Character.cpp" />
     <ClCompile Include="GameEngine.cpp" />
+    <ClCompile Include="LevelManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Masha.cpp" />
   </ItemGroup>
@@ -160,6 +161,7 @@
     <ClInclude Include="Bear.h" />
     <ClInclude Include="Character.h" />
     <ClInclude Include="GameEngine.h" />
+    <ClInclude Include="LevelManager.h" />
     <ClInclude Include="Masha.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
