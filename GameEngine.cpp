@@ -1,29 +1,44 @@
-#include "GameEngine.h"
+п»ї#include "GameEngine.h"
 
 GameEngine::GameEngine()
 {
-	// получаем разрешение экрана
+	// РїРѕР»СѓС‡Р°РµРј СЂР°Р·СЂРµС€РµРЅРёРµ СЌРєСЂР°РЅР°
 	sf::Vector2f resolution;
 	resolution.x = sf::VideoMode::getDesktopMode().width;
 	resolution.y = sf::VideoMode::getDesktopMode().height;
-	m_Window.create(sf::VideoMode(resolution.x, resolution.y), L"Пещеры",sf::Style::Fullscreen);
-	// Инициализировать полноэкранный режим
+	m_Window.create(sf::VideoMode(resolution.x, resolution.y), L"РџРµС‰РµСЂС‹",sf::Style::Fullscreen);
+	// РРЅРёС†РёР°Р»РёР·РёСЂРѕРІР°С‚СЊ РїРѕР»РЅРѕСЌРєСЂР°РЅРЅС‹Р№ СЂРµР¶РёРј
 	m_MainView.setSize(1920,1080);
 	m_HudView.reset(sf::FloatRect(0, 0, 1920, 1080));
-	// Инициализировать представления с разделенным	экраном
+	// РРЅРёС†РёР°Р»РёР·РёСЂРѕРІР°С‚СЊ РїСЂРµРґСЃС‚Р°РІР»РµРЅРёСЏ СЃ СЂР°Р·РґРµР»РµРЅРЅС‹Рј	СЌРєСЂР°РЅРѕРј
 	m_LeftView.setViewport(sf::FloatRect(0.001f, 0.001f, 0.498f, 0.998f));
 	m_RightView.setViewport(sf::FloatRect(0.5f, 0.001f, 0.499f, 0.998f));
 	m_BGLeftView.setViewport(sf::FloatRect(0.001f, 0.001f, 0.498f, 0.998f));
 	m_BGRightView.setViewport(sf::FloatRect(0.5f, 0.001f, 0.499f, 0.998f));
 	m_BackgroundTexture = AssetManager::GetTexture("graphics/background1.jpg");
-	// Свяжем спрайт с текстурой
+	// РЎРІСЏР¶РµРј СЃРїСЂР°Р№С‚ СЃ С‚РµРєСЃС‚СѓСЂРѕР№
 	m_BackgroundSprite.setTexture(m_BackgroundTexture);
 	
 	if (!m_icon.loadFromFile("game.png")) exit(3); 
 	m_Window.setIcon(128, 128, m_icon.getPixelsPtr());
+	
+	// РњРѕР¶РµС‚ Р»Рё СЌС‚Р° РІРёРґРµРѕРєР°СЂС‚Р° РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ С€РµР№РґРµСЂС‹?
+	if (!sf::Shader::isAvailable())
+	{
+		// РЁРµР№РґРµСЂР° РЅРµ СЂР°Р±РѕС‚Р°СЋС‚
+		m_Window.close();
+	}
+	else
+	{
+		// Р·Р°РіСЂСѓР¶Р°РµРј РґРІР° С€РµР№РґРµСЂР° (vertex, fragment)
+		m_RippleShader.loadFromFile("shaders/vertShader.vert","shaders/rippleShader.frag");
+	}
 
-	// Загружаем текстуру для фонового массива вершин
+	// Р—Р°РіСЂСѓР¶Р°РµРј С‚РµРєСЃС‚СѓСЂСѓ РґР»СЏ С„РѕРЅРѕРІРѕРіРѕ РјР°СЃСЃРёРІР° РІРµСЂС€РёРЅ
 	m_TextureTiles = AssetManager::GetTexture("graphics/levels.png");
+
+	// РРЅРёС†РёР°Р»РёР·РёСЂСѓРµРј СЃРёСЃС‚РµРјСѓ С‡Р°СЃС‚РёС†
+	m_PS.init(5000);
 
 }
 void GameEngine::input()
@@ -33,22 +48,22 @@ void GameEngine::input()
 	while (m_Window.pollEvent(event)) {
 		
 		if (event.type == sf::Event::KeyPressed) {
-			// Обработка выхода игрока
+			// РћР±СЂР°Р±РѕС‚РєР° РІС‹С…РѕРґР° РёРіСЂРѕРєР°
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) {
 
 				m_Window.close();
 			}
-			// Обработка игрока, запускающего игру
+			// РћР±СЂР°Р±РѕС‚РєР° РёРіСЂРѕРєР°, Р·Р°РїСѓСЃРєР°СЋС‰РµРіРѕ РёРіСЂСѓ
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Return)) {
 
 				m_Playing = true;
 			}
-			// Переключение между Машей и Мишей
+			// РџРµСЂРµРєР»СЋС‡РµРЅРёРµ РјРµР¶РґСѓ РњР°С€РµР№ Рё РњРёС€РµР№
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q)) {
 
 				m_Character1 = !m_Character1;
 			}
-			// Переключение между полным и разделенным
+			// РџРµСЂРµРєР»СЋС‡РµРЅРёРµ РјРµР¶РґСѓ РїРѕР»РЅС‹Рј Рё СЂР°Р·РґРµР»РµРЅРЅС‹Рј
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::E)) {
 
 				m_SplitScreen = !m_SplitScreen;
@@ -57,15 +72,15 @@ void GameEngine::input()
 		}
 		
 	}
-		// Обработка ввода, характерного для медведя
+		// РћР±СЂР°Р±РѕС‚РєР° РІРІРѕРґР°, С…Р°СЂР°РєС‚РµСЂРЅРѕРіРѕ РґР»СЏ РјРµРґРІРµРґСЏ
 		if (m_bear.handleInput())
 		{
-			// Воспроизвести звук прыжка
+			m_SM.playJump();
 		}
-		// Обработка ввода, характерного для маши
+		// РћР±СЂР°Р±РѕС‚РєР° РІРІРѕРґР°, С…Р°СЂР°РєС‚РµСЂРЅРѕРіРѕ РґР»СЏ РјР°С€Рё
 		if (m_masha.handleInput())
 		{
-			// Воспроизвести звук прыжка
+			m_SM.playJump();
 		}
 		
 }
@@ -74,32 +89,32 @@ void GameEngine::update(float dtAsSeconds)
 	
 	if (m_NewLevelRequired)	{
 
-		// Загружаем уровень
+		// Р—Р°РіСЂСѓР¶Р°РµРј СѓСЂРѕРІРµРЅСЊ
 		loadLevel();
 	}
-	// начало игры
+	// РЅР°С‡Р°Р»Рѕ РёРіСЂС‹
 	if (m_Playing)	{
 
-		// обновление свойств персонажей
+		// РѕР±РЅРѕРІР»РµРЅРёРµ СЃРІРѕР№СЃС‚РІ РїРµСЂСЃРѕРЅР°Р¶РµР№
 		m_bear.update(dtAsSeconds);
 		m_masha.update(dtAsSeconds);
-		// Обнаружение столкновений и проверка, достигли ли персонажи целей
-		// Вторая часть условия if выполняется 
-		// только тогда, когда	Медведь касается домашней плитки
+		// РћР±РЅР°СЂСѓР¶РµРЅРёРµ СЃС‚РѕР»РєРЅРѕРІРµРЅРёР№ Рё РїСЂРѕРІРµСЂРєР°, РґРѕСЃС‚РёРіР»Рё Р»Рё РїРµСЂСЃРѕРЅР°Р¶Рё С†РµР»РµР№
+		// Р’С‚РѕСЂР°СЏ С‡Р°СЃС‚СЊ СѓСЃР»РѕРІРёСЏ if РІС‹РїРѕР»РЅСЏРµС‚СЃСЏ 
+		// С‚РѕР»СЊРєРѕ С‚РѕРіРґР°, РєРѕРіРґР°	РњРµРґРІРµРґСЊ РєР°СЃР°РµС‚СЃСЏ РґРѕРјР°С€РЅРµР№ РїР»РёС‚РєРё
 
 		if (detectCollisions(m_bear) && detectCollisions(m_masha))
 		{
-			// Требуется новый уровень
+			// РўСЂРµР±СѓРµС‚СЃСЏ РЅРѕРІС‹Р№ СѓСЂРѕРІРµРЅСЊ
 			m_NewLevelRequired = true;
-			// Воспроизвести звук 
+			m_SM.playReachGoal();
 		}
 		else
 		{
-			// Запустить обнаружение столкновений
+			// Р—Р°РїСѓСЃС‚РёС‚СЊ РѕР±РЅР°СЂСѓР¶РµРЅРёРµ СЃС‚РѕР»РєРЅРѕРІРµРЅРёР№
 			detectCollisions(m_masha);
 		}
 
-		// персонажи пригают друг другу на голову
+		// РїРµСЂСЃРѕРЅР°Р¶Рё РїСЂРёРіР°СЋС‚ РґСЂСѓРі РґСЂСѓРіСѓ РЅР° РіРѕР»РѕРІСѓ
 		if (m_masha.getFeet().intersects(m_bear.getHead()))
 		{
 			m_masha.stopFalling(m_bear.getHead().top);
@@ -109,16 +124,37 @@ void GameEngine::update(float dtAsSeconds)
 			m_bear.stopFalling(m_masha.getHead().top);
 		}
 
-		// Обратный отсчет времени, когда игрок ушел
-		//m_TimeRemaining -= dtAsSeconds;
-		// Закончилось игровое время
+		// РћР±СЂР°С‚РЅС‹Р№ РѕС‚СЃС‡РµС‚ РІСЂРµРјРµРЅРё, РєРѕРіРґР° РёРіСЂРѕРє СѓС€РµР»
+		m_TimeRemaining -= dtAsSeconds;
+		// Р—Р°РєРѕРЅС‡РёР»РѕСЃСЊ РёРіСЂРѕРІРѕРµ РІСЂРµРјСЏ
 		if (m_TimeRemaining <= 0)
 		{
 			m_NewLevelRequired = true;
 		}
-	}// конец игры
+	}// РєРѕРЅРµС† РёРіСЂС‹
 
-	// Установить  вид для соответствующего персонажа
+	// Check if a fire sound needs to be played
+	std::vector<sf::Vector2f>::iterator it;
+	// РС‚РµСЂР°С†РёСЏ РїРѕ РІРµРєС‚РѕСЂСѓ РѕР±СЉРµРєС‚РѕРІ Vector2f
+	for (it = m_FireEmitters.begin(); it != m_FireEmitters.end(); it++)
+	{
+		// Р“РґРµ РЅР°С…РѕРґРёС‚СЃСЏ СЌС‚РѕС‚ СЌРјРёС‚С‚РµСЂ? 
+		// РЎРѕС…СЂР°РЅСЏРµРј РјРµСЃС‚РѕРїРѕР»РѕР¶РµРЅРёРµ РІ pos
+		float posX = (*it).x;
+		float posY = (*it).y;
+		// СЌРјРёС‚С‚РµСЂ СЂСЏРґРѕРј СЃ РёРіСЂРѕРєРѕРј?
+		// РЎРѕР·РґР°РµРј РїСЂСЏРјРѕСѓРіРѕР»СЊРЅРёРє СЂР°Р·РјРµСЂРѕРј 500 РїРёРєСЃРµР»РµР№ РІРѕРєСЂСѓРі
+		sf::FloatRect localRect(posX - 50, posY - 50, 100, 100);
+		// РРіСЂРѕРє РІРЅСѓС‚СЂРё localRect?
+		if (m_bear.getPosition().intersects(localRect))
+		{
+			// Р’РѕСЃРїСЂРѕРёР·РІРµРґРµРЅРёРµ Р·РІСѓРєР° Рё РїРµСЂРµРґР°С‡Р° РјРµСЃС‚РѕРїРѕР»РѕР¶РµРЅРёСЏ
+			m_SM.playFire(sf::Vector2f(posX, posY), m_bear.getCenter());
+		}
+	}
+
+
+	// РЈСЃС‚Р°РЅРѕРІРёС‚СЊ  РІРёРґ РґР»СЏ СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓСЋС‰РµРіРѕ РїРµСЂСЃРѕРЅР°Р¶Р°
 	if (m_SplitScreen)
 	{
 		m_LeftView.setCenter(m_bear.getCenter());
@@ -126,9 +162,9 @@ void GameEngine::update(float dtAsSeconds)
 	}
 	else
 	{
-		// Центрировать весь экран вокруг соответсвующего персонажа
+		// Р¦РµРЅС‚СЂРёСЂРѕРІР°С‚СЊ РІРµСЃСЊ СЌРєСЂР°РЅ РІРѕРєСЂСѓРі СЃРѕРѕС‚РІРµС‚СЃРІСѓСЋС‰РµРіРѕ РїРµСЂСЃРѕРЅР°Р¶Р°
 		if (m_Character1)
-		{
+		{	
 			m_MainView.setCenter(m_bear.getCenter());
 		}
 		else
@@ -136,59 +172,111 @@ void GameEngine::update(float dtAsSeconds)
 			m_MainView.setCenter(m_masha.getCenter());
 		}
 	}
+
+	// РѕР±РЅРѕРІР»РµРЅРёРµ РІСЂРµРјРµРЅРё РёРЅС‚РµСЂРІР°Р»Р° РёР·РјРµРЅРµРЅРёСЏ Р·РЅР°С‡РµРЅРёР№ РёРЅС‚РµСЂС„РµР№СЃР°
+	m_FramesSinceLastHUDUpdate++;
+	// РћР±РЅРѕРІР»СЏР№С‚Рµ HUD РєР°Р¶РґС‹Рµ РєР°РґСЂ
+	if (m_FramesSinceLastHUDUpdate > m_TargetFramesPerHUDUpdate)
+	{
+		// РћР±РЅРѕРІР»СЏРµРј РІСЂРµРјСЏ
+		m_Hud.setTime(m_TimeRemaining);
+		// РћР±РЅРѕРІР»СЏРµРј СѓСЂРѕРІРµРЅСЊ 
+		m_Hud.setLevel(m_LM.getCurrentLevel());
+		m_FramesSinceLastHUDUpdate = 0;
+	}
+
+	// РћР±РЅРѕРІР»СЏРµРј СЃРёСЃС‚РµРјСѓ С‡Р°СЃС‚РёС†
+	if (m_PS.running())
+	{
+		m_PS.update(dtAsSeconds);
+	}
+
 }
 
 void GameEngine::draw()
 {
-	//очищаем последний кадр
-	m_Window.clear(sf::Color::White);
+	//РѕС‡РёС‰Р°РµРј РїРѕСЃР»РµРґРЅРёР№ РєР°РґСЂ
+	m_Window.clear(sf::Color::Black);
+	// РћР±РЅРѕРІР»СЏРµРј РїР°СЂР°РјРµС‚СЂС‹ С€РµР№РґРµСЂР°
+	m_RippleShader.setUniform("uTime", m_GameTimeTotal.asSeconds());
+
 	if (!m_SplitScreen)
 	{
-		// Переключиться на фоновый вид
+		// РџРµСЂРµРєР»СЋС‡РёС‚СЊСЃСЏ РЅР° С„РѕРЅРѕРІС‹Р№ РІРёРґ
 		m_Window.setView(m_BGMainView);
-		//Рисуем фон
+		//Р РёСЃСѓРµРј С„РѕРЅ
 		m_Window.draw(m_BackgroundSprite);
-		// Переключиться на m_MainView
+		// РќР°СЂРёСЃСѓР№С‚Рµ С„РѕРЅ СЃ СЌС„С„РµРєС‚РѕРј С€РµР№РґРµСЂР°
+		m_Window.draw(m_BackgroundSprite, &m_RippleShader);
+		// РџРµСЂРµРєР»СЋС‡РёС‚СЊСЃСЏ РЅР° m_MainView
 		m_Window.setView(m_MainView);
-		// Рисуем уровень
+		
+		// Р РёСЃСѓРµРј СѓСЂРѕРІРµРЅСЊ
 		m_Window.draw(m_VALevel, &m_TextureTiles);
-		// Рисуем персонажей
+		// Р РёСЃСѓРµРј РїРµСЂСЃРѕРЅР°Р¶РµР№
 		m_Window.draw(m_bear.getSprite());
 		m_Window.draw(m_masha.getSprite());
+
+		// Р РёСЃСѓРµРј СЃРёСЃС‚РµРјСѓ С‡Р°СЃС‚РёС†
+		if (m_PS.running())
+		{
+			m_Window.draw(m_PS);
+		}
 	}
 	else
 	{
-		// Режим разделенного экрана активен
-       // Сначала рисуем сторону экрана Маши
-        // Переключиться на фоновый вид
+		// Р РµР¶РёРј СЂР°Р·РґРµР»РµРЅРЅРѕРіРѕ СЌРєСЂР°РЅР° Р°РєС‚РёРІРµРЅ
+       // РЎРЅР°С‡Р°Р»Р° СЂРёСЃСѓРµРј СЃС‚РѕСЂРѕРЅСѓ СЌРєСЂР°РЅР° РњР°С€Рё
+        // РџРµСЂРµРєР»СЋС‡РёС‚СЊСЃСЏ РЅР° С„РѕРЅРѕРІС‹Р№ РІРёРґ
 		m_Window.setView(m_BGLeftView);
-		// Рисуем фон
+		// Р РёСЃСѓРµРј С„РѕРЅ
 		m_Window.draw(m_BackgroundSprite);
-		// Переключиться на m_LeftView
+		// РќР°СЂРёСЃСѓР№С‚Рµ С„РѕРЅ СЃ СЌС„С„РµРєС‚РѕРј С€РµР№РґРµСЂР°
+		m_Window.draw(m_BackgroundSprite, &m_RippleShader);
+		// РџРµСЂРµРєР»СЋС‡РёС‚СЊСЃСЏ РЅР° m_LeftView
 		m_Window.setView(m_LeftView);
-		// Рисуем уровень
+		
+		// Р РёСЃСѓРµРј СѓСЂРѕРІРµРЅСЊ
 		m_Window.draw(m_VALevel, &m_TextureTiles);
-		// Рисуем персонажей
+		// Р РёСЃСѓРµРј РїРµСЂСЃРѕРЅР°Р¶РµР№
 		m_Window.draw(m_masha.getSprite());
 		m_Window.draw(m_bear.getSprite());
-	
-		// Теперь рисуем сторону Миши
-		// Переключиться на фоновый вид
+		// Р РёСЃСѓРµРј СЃРёСЃС‚РµРјСѓ С‡Р°СЃС‚РёС†
+		if (m_PS.running())
+		{
+			m_Window.draw(m_PS);
+		}
+		// РўРµРїРµСЂСЊ СЂРёСЃСѓРµРј СЃС‚РѕСЂРѕРЅСѓ РњРёС€Рё
+		// РџРµСЂРµРєР»СЋС‡РёС‚СЊСЃСЏ РЅР° С„РѕРЅРѕРІС‹Р№ РІРёРґ
 		m_Window.setView(m_BGRightView);
-		// Рисуем фон
-		m_Window.draw(m_BackgroundSprite);
-		// Переключиться на  m_RightView
+		
+		// РџРµСЂРµРєР»СЋС‡РёС‚СЊСЃСЏ РЅР°  m_RightView
 		m_Window.setView(m_RightView);
-		// Рисуем уровень
+		// Р РёСЃСѓРµРј С„РѕРЅ
+		m_Window.draw(m_BackgroundSprite);
+		// РќР°СЂРёСЃСѓР№С‚Рµ С„РѕРЅ СЃ СЌС„С„РµРєС‚РѕРј С€РµР№РґРµСЂР°
+		m_Window.draw(m_BackgroundSprite, &m_RippleShader);
+		// Р РёСЃСѓРµРј СѓСЂРѕРІРµРЅСЊ
 		m_Window.draw(m_VALevel, &m_TextureTiles);
-		// Рисуем персонажей
+		// Р РёСЃСѓРµРј РїРµСЂСЃРѕРЅР°Р¶РµР№
 		m_Window.draw(m_bear.getSprite());
 		m_Window.draw(m_masha.getSprite());
+		// Р РёСЃСѓРµРј СЃРёСЃС‚РµРјСѓ С‡Р°СЃС‚РёС†
+		if (m_PS.running())
+		{
+			m_Window.draw(m_PS);
+		}
 	}
-	// Рисуем HUD
-	// Переключиться на  m_HudView
+	// Р РёСЃСѓРµРј HUD
+	// РџРµСЂРµРєР»СЋС‡РёС‚СЊСЃСЏ РЅР°  m_HudView
 	m_Window.setView(m_HudView);
-	// Показать все, что мы только что нарисовали
+	m_Window.draw(m_Hud.getLevel());
+	m_Window.draw(m_Hud.getTime());
+	if (!m_Playing)
+	{
+		m_Window.draw(m_Hud.getMessage());
+	}
+	// РџРѕРєР°Р·Р°С‚СЊ РІСЃРµ, С‡С‚Рѕ РјС‹ С‚РѕР»СЊРєРѕ С‡С‚Рѕ РЅР°СЂРёСЃРѕРІР°Р»Рё
 	m_Window.display();
 }
 
@@ -196,12 +284,12 @@ void GameEngine::draw()
 
 void GameEngine::run()
 {
-	// Объявление переменной часы
+	// РћР±СЉСЏРІР»РµРЅРёРµ РїРµСЂРµРјРµРЅРЅРѕР№ С‡Р°СЃС‹
 	sf::Clock clock;
-	// Цикл работает пока окно открыто
+	// Р¦РёРєР» СЂР°Р±РѕС‚Р°РµС‚ РїРѕРєР° РѕРєРЅРѕ РѕС‚РєСЂС‹С‚Рѕ
 	while (m_Window.isOpen())
 	{
-		// Текущее время присваиваем переменной времени dt
+		// РўРµРєСѓС‰РµРµ РІСЂРµРјСЏ РїСЂРёСЃРІР°РёРІР°РµРј РїРµСЂРµРјРµРЅРЅРѕР№ РІСЂРµРјРµРЅРё dt
 		sf::Time dt = clock.restart();
 		m_GameTimeTotal += dt;
 		float dtAsSeconds = dt.asSeconds();
@@ -215,83 +303,82 @@ void GameEngine::run()
 void GameEngine::loadLevel()
 {
 	m_Playing = false;
-	// Удаляем ранее выделенную память
-	for (int i = 0; i < m_LM.getLevelSize().y; ++i)
-	{
-		delete[] m_ArrayLevel[i];
-	}
-	delete[] m_ArrayLevel;
-	// Загружаем следующий массив 2d с картой для уровня 
-	// И снова заполняем массив вершин
-	m_ArrayLevel = m_LM.nextLevel(m_VALevel);
-	// Сколько длится этот новый лимит времени
+	if (!m_matrix.empty()) m_matrix.clear();
+	// Р—Р°РіСЂСѓР¶Р°РµРј СЃР»РµРґСѓСЋС‰РёР№ РјР°СЃСЃРёРІ 2d СЃ РєР°СЂС‚РѕР№ РґР»СЏ СѓСЂРѕРІРЅСЏ 
+	// Р СЃРЅРѕРІР° Р·Р°РїРѕР»РЅСЏРµРј РјР°СЃСЃРёРІ РІРµСЂС€РёРЅ
+	m_LM.nextLevel(m_matrix,m_VALevel);
+	// РџРѕРґРіРѕС‚РѕРІРёС‚СЊ РёР·Р»СѓС‡Р°С‚РµР»Рё Р·РІСѓРєР°
+	populateEmitters(m_FireEmitters);
+	// РЎРєРѕР»СЊРєРѕ РґР»РёС‚СЃСЏ СЌС‚РѕС‚ РЅРѕРІС‹Р№ Р»РёРјРёС‚ РІСЂРµРјРµРЅРё
 	m_TimeRemaining = m_LM.getTimeLimit();
-	// Создаем персонажей
+	// РЎРѕР·РґР°РµРј РїРµСЂСЃРѕРЅР°Р¶РµР№
 	m_bear.spawn(m_LM.getStartPosition(), GRAVITY);
 	m_masha.spawn(m_LM.getStartPosition(), GRAVITY);
-	// Убедитесь, что этот код больше не запускается
+	// РЈР±РµРґРёС‚РµСЃСЊ, С‡С‚Рѕ СЌС‚РѕС‚ РєРѕРґ Р±РѕР»СЊС€Рµ РЅРµ Р·Р°РїСѓСЃРєР°РµС‚СЃСЏ
 	m_NewLevelRequired = false;
 }
 
 bool GameEngine::detectCollisions(Character& character)
 {
 	bool reachedGoal = false;
-	// Зона обнаружения персонажа
+	// Р—РѕРЅР° РѕР±РЅР°СЂСѓР¶РµРЅРёСЏ РїРµСЂСЃРѕРЅР°Р¶Р°
 	sf::FloatRect detectionZone = character.getPosition();
-	// Сделать FloatRect для проверки каждого блока
+	// РЎРґРµР»Р°С‚СЊ FloatRect РґР»СЏ РїСЂРѕРІРµСЂРєРё РєР°Р¶РґРѕРіРѕ Р±Р»РѕРєР°
 	sf::FloatRect block;
 	block.width = TILE_SIZE;
 	block.height = TILE_SIZE;
-	// Строим зону вокруг медеведя для обнаружения столкновений
+	// РЎС‚СЂРѕРёРј Р·РѕРЅСѓ РІРѕРєСЂСѓРі РјРµРґРµРІРµРґСЏ РґР»СЏ РѕР±РЅР°СЂСѓР¶РµРЅРёСЏ СЃС‚РѕР»РєРЅРѕРІРµРЅРёР№
 	int startX = (int)(detectionZone.left / TILE_SIZE) - 1;
 	int startY = (int)(detectionZone.top / TILE_SIZE) - 1;
 	int endX = (int)(detectionZone.left / TILE_SIZE) + 2;
-	// Медведь довольно высокий, поэтому проверьте несколько плиток по вертикали
+	// РњРµРґРІРµРґСЊ РґРѕРІРѕР»СЊРЅРѕ РІС‹СЃРѕРєРёР№, РїРѕСЌС‚РѕРјСѓ РїСЂРѕРІРµСЂСЊС‚Рµ РЅРµСЃРєРѕР»СЊРєРѕ РїР»РёС‚РѕРє РїРѕ РІРµСЂС‚РёРєР°Р»Рё
 	int endY = (int)(detectionZone.top / TILE_SIZE) + 5;
-	// Убедитесь, что мы не проверяем позиции ниже нуля 
-	// Или выше конца массива
+	// РЈР±РµРґРёС‚РµСЃСЊ, С‡С‚Рѕ РјС‹ РЅРµ РїСЂРѕРІРµСЂСЏРµРј РїРѕР·РёС†РёРё РЅРёР¶Рµ РЅСѓР»СЏ 
+	// РР»Рё РІС‹С€Рµ РєРѕРЅС†Р° РјР°СЃСЃРёРІР°
 	if (startX < 0)startX = 0;
 	if (startY < 0)startY = 0;
 	if (endX >= m_LM.getLevelSize().x)
 		endX = m_LM.getLevelSize().x;
 	if (endY >= m_LM.getLevelSize().y)
 		endY = m_LM.getLevelSize().y;
-	// Персонаж выпал за пределы карты? 
+	// РџРµСЂСЃРѕРЅР°Р¶ РІС‹РїР°Р» Р·Р° РїСЂРµРґРµР»С‹ РєР°СЂС‚С‹? 
 	sf::FloatRect level(0, 0, m_LM.getLevelSize().x * TILE_SIZE,
 								m_LM.getLevelSize().y * TILE_SIZE);
 	if (!character.getPosition().intersects(level))
 	{
-		// возрождаем персонажа
+		// РІРѕР·СЂРѕР¶РґР°РµРј РїРµСЂСЃРѕРЅР°Р¶Р°
 		character.spawn(m_LM.getStartPosition(), GRAVITY);
 	}
-	// Перебираем все локальные блоки
+	// РџРµСЂРµР±РёСЂР°РµРј РІСЃРµ Р»РѕРєР°Р»СЊРЅС‹Рµ Р±Р»РѕРєРё
 	for (int x = startX; x < endX; x++)
 	{
 		for (int y = startY; y < endY; y++)
 		{
-			// Инициализировать начальную позицию текущего блока
+			// РРЅРёС†РёР°Р»РёР·РёСЂРѕРІР°С‚СЊ РЅР°С‡Р°Р»СЊРЅСѓСЋ РїРѕР·РёС†РёСЋ С‚РµРєСѓС‰РµРіРѕ Р±Р»РѕРєР°
 			block.left = x * TILE_SIZE;
 			block.top = y * TILE_SIZE;
-			// Персонаж сгорел или утонул? 
-			// Используйте голову,	так как это позволит ему немного утонуть
-			if (m_ArrayLevel[y][x] == 2 || m_ArrayLevel[y][x] == 3)
+			// РџРµСЂСЃРѕРЅР°Р¶ СЃРіРѕСЂРµР» РёР»Рё СѓС‚РѕРЅСѓР»? 
+			// РСЃРїРѕР»СЊР·СѓР№С‚Рµ РіРѕР»РѕРІСѓ,	С‚Р°Рє РєР°Рє СЌС‚Рѕ РїРѕР·РІРѕР»РёС‚ РµРјСѓ РЅРµРјРЅРѕРіРѕ СѓС‚РѕРЅСѓС‚СЊ
+			if (m_matrix[y][x] == 2 || m_matrix[y][x] == 3)
 			{
 				if (character.getHead().intersects(block))
 				{
 					character.spawn(m_LM.getStartPosition(), GRAVITY);
-					// Какой звук должен воспроизводиться ?
-					if (m_ArrayLevel[y][x] == 2) // Огонь
+					// РљР°РєРѕР№ Р·РІСѓРє РґРѕР»Р¶РµРЅ РІРѕСЃРїСЂРѕРёР·РІРѕРґРёС‚СЊСЃСЏ ?
+					if (m_matrix[y][x] == 2) // РћРіРѕРЅСЊ
 					{
-						// Воспроизвести звук
+						// Р’РѕСЃРїСЂРѕРёР·РІРµСЃС‚Рё Р·РІСѓРє
+						m_SM.playFallInFire(character.getIdentifier());
 					}
-					else // Вода
+					else // Р’РѕРґР°
 					{
-						// Воспроизвести звук
+						// Р’РѕСЃРїСЂРѕРёР·РІРµСЃС‚Рё Р·РІСѓРє
+						m_SM.playFallInWater();
 					}
 				}
 			}
-			// Персонаж сталкивается с обычным блоком
-			if (m_ArrayLevel[y][x] == 1)
+			// РџРµСЂСЃРѕРЅР°Р¶ СЃС‚Р°Р»РєРёРІР°РµС‚СЃСЏ СЃ РѕР±С‹С‡РЅС‹Рј Р±Р»РѕРєРѕРј
+			if (m_matrix[y][x] == 1)
 			{
 				if (character.getRight().intersects(block))
 				{
@@ -310,15 +397,63 @@ bool GameEngine::detectCollisions(Character& character)
 					character.stopJump();
 				}
 			}
-			// Здесь будет больше обнаружения столкновений, 
-			// когда появятся эффекты частиц
-			if (m_ArrayLevel[y][x] == 4)
+			
+			// РќРѕРіРё РїРµСЂСЃРѕРЅР°Р¶РµР№ РєР°СЃР°Р»РёСЃСЊ РѕРіРЅСЏ РёР»Рё РІРѕРґС‹?
+			// Р•СЃР»Рё РґР°, Р·Р°РїСѓСЃРєР°РµРј СЌС„С„РµРєС‚ С‡Р°СЃС‚РёС†
+			// РЈР±РµРґРёС‚РµСЃСЊ, С‡С‚Рѕ СЌС‚Рѕ РїРµСЂРІС‹Р№ СЂР°Р·, РєРѕРіРґР° РјС‹ РѕР±РЅР°СЂСѓР¶РёР»Рё СЌС‚Рѕ
+			// РїСЂРѕРІРµСЂРёРІ, Р·Р°РїСѓС‰РµРЅ Р»Рё СѓР¶Рµ СЌС„С„РµРєС‚
+			if (!m_PS.running()) {
+				if (m_matrix[y][x] == 2 || m_matrix[y][x] == 3)
+				{
+					if (character.getFeet().intersects(block))
+					{
+						// РїРѕР·РёС†РёРѕРЅРёСЂСѓРµРј Рё Р·Р°РїСѓСЃРєР°РµРј СЃРёСЃС‚РµРјСѓ С‡Р°СЃС‚РёС†
+						m_PS.emitParticles(character.getCenter());
+					}
+				}
+			}
+
+			if (m_matrix[y][x] == 4)
 			{
-				// Персонаж достиг цели
+				// РџРµСЂСЃРѕРЅР°Р¶ РґРѕСЃС‚РёРі С†РµР»Рё
 				reachedGoal = true;
 			}
 		}
 	}
 
 	return reachedGoal;
+}
+
+void GameEngine::populateEmitters(std::vector <sf::Vector2f>& vSoundEmitters)
+{
+	// РЈР±РµРґРёС‚РµСЃСЊ, С‡С‚Рѕ РІРµРєС‚РѕСЂ РїСѓСЃС‚
+	if (vSoundEmitters.empty()) {
+		// РЎР»РµРґРёРј Р·Р° РїСЂРµРґС‹РґСѓС‰РёРј СЌРјРёС‚С‚РµСЂРѕРј, 
+		// С‡С‚РѕР±С‹ РЅРµ СЃРѕР·РґР°РІР°С‚СЊ СЃР»РёС€РєРѕРј РјРЅРѕРіРѕ
+		sf::FloatRect previousEmitter;
+		// РџРѕРёСЃРє РѕРіРЅСЏ РЅР° СѓСЂРѕРІРЅРµ
+		for (int x = 0; x < (int)m_LM.getLevelSize().x; x++)
+		{
+			for (int y = 0; y < (int)m_LM.getLevelSize().y; y++)
+			{
+				if (m_matrix[y][x] == 2) // РµСЃС‚СЊ РѕРіРѕРЅСЊ 	
+				{
+					// РџСЂРѕРїСѓСЃРєР°РµРј РІСЃРµ РїР»РёС‚РєРё РѕРіРЅСЏ
+					// СЂСЏРґРѕРј СЃ РїСЂРµРґС‹РґСѓС‰РёРј СЌРјРёС‚С‚РµСЂРѕРј
+					if (!sf::FloatRect(x * TILE_SIZE,y * TILE_SIZE,	TILE_SIZE,TILE_SIZE).intersects(previousEmitter)) {
+						// Р”РѕР±Р°РІР»СЏРµРј РєРѕРѕСЂРґРёРЅР°С‚С‹ СЌС‚РѕРіРѕ РІРѕРґРѕР±Р»РѕРєР°
+						vSoundEmitters.push_back(sf::Vector2f(x * TILE_SIZE, y * TILE_SIZE));
+						// Р”РµР»Р°РµРј РїСЂСЏРјРѕСѓРіРѕР»СЊРЅРёРє 6 Р±Р»РѕРєРѕРІ x 6 Р±Р»РѕРєРѕРІ, 
+						// С‡С‚РѕР±С‹ Р±РѕР»СЊС€Рµ РЅРµ СЃРѕР·РґР°РІР°С‚СЊ СЌРјРёС‚С‚РµСЂС‹ 
+						// СЃР»РёС€РєРѕРј Р±Р»РёР·РєРѕ Рє СЌС‚РѕРјСѓ
+						previousEmitter.left = x * TILE_SIZE;
+						previousEmitter.top = y * TILE_SIZE;
+						previousEmitter.width = TILE_SIZE * 6;
+						previousEmitter.height = TILE_SIZE * 6;
+					}
+				}
+			}
+		}
+	}
+	return;
 }

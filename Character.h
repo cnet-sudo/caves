@@ -20,7 +20,8 @@ class Character {
 		float m_TimeThisJump;
 		// игрок только что совершил прыжок
 		bool m_JustJumped = false;
-
+		// индификатор персонажа
+		int m_identifier;
 	private:
 		// гравитация
 		float m_Gravity;
@@ -48,6 +49,7 @@ class Character {
 		sf::FloatRect getHead();
 		sf::FloatRect getRight();
 		sf::FloatRect getLeft();
+		int getIdentifier();
 		// возвращаем копию спрайта
 		sf::Sprite getSprite();
 		// Заставить персонажа стоять прочно

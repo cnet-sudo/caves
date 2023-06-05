@@ -1,9 +1,12 @@
 #pragma once
 #include<iostream>
-#include"AssetManager.h"
+#include<string>
 #include "Masha.h"
 #include "Bear.h"
 #include "LevelManager.h"
+#include "SoundManager.h"
+#include "HUD.h"
+#include "ParticleSystem.h"
 
 class GameEngine
 {
@@ -17,11 +20,21 @@ private:
 
 	// Менеджер ресурсов
 	AssetManager manager; 
+	// Создаём ситему частиц
+	ParticleSystem m_PS;
 	// Маша и Медведь
 	Bear m_bear;
 	Masha m_masha;
 	// Класс для управления всеми уровнями
 	LevelManager m_LM;
+	// 2d матрица карты уровня
+	std::vector<std::vector<int>> m_matrix;
+	// Класс для управления музыкой
+	SoundManager m_SM;
+	// Интерфейс
+	HUD m_Hud;
+	int m_FramesSinceLastHUDUpdate = 0;
+	int m_TargetFramesPerHUDUpdate = 500;
 	// размер плиток в спрайте
 	const int TILE_SIZE = 50;
 	// четыре вершины четырёх угольника
@@ -43,6 +56,9 @@ private:
 	// Спрайты и текстуры для фона
 	sf::Sprite m_BackgroundSprite;
 	sf::Texture m_BackgroundTexture;
+	// Объявить шейдер для фона
+	sf::Shader m_RippleShader;
+
 	// Идёт игровой процесс или нет
 	bool m_Playing = false;
 	// Кто из игроков в фокусе
@@ -50,15 +66,12 @@ private:
 	// Запуск в полноэкранный режим
 	bool m_SplitScreen = false;
 	// Оставшееся время на текущем уровне
-	float m_TimeRemaining = 10;
+	float m_TimeRemaining = 10.0f;
 	sf::Time m_GameTimeTotal;
 	// Надо ли начинать заново
 	bool m_NewLevelRequired = true;
 	// Массив вершин для тайлов уровня
 	sf::VertexArray m_VALevel;
-	// Массив 2d с картой уровня 
-	// Указатель на	указатель
-	int** m_ArrayLevel = NULL;
 	// Текстура тайлов уровня Texture
 	sf::Texture m_TextureTiles;
 	// иконка
@@ -74,5 +87,11 @@ private:
 	void loadLevel();
 
 	bool detectCollisions(Character& character);
+
+	// Создаем вектор мест для воспроизведения звука 
+	void populateEmitters(std::vector <sf::Vector2f>& vSoundEmitters);
+	
+	// Вектор Vector2f для местоположения источника огня vector
+	std::vector <sf::Vector2f> m_FireEmitters;
 };
 

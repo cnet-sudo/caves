@@ -24,7 +24,7 @@ public:
 	float getTimeLimit();
 	sf::Vector2f getStartPosition();
 	// построение уровня
-	int** nextLevel(sf::VertexArray& rVaLevel);
+	void nextLevel(std::vector<std::vector<int>>& matrix,sf::VertexArray& rVaLevel);
 	sf::Vector2i getLevelSize();
 	int getCurrentLevel();
 };

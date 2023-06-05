@@ -2,6 +2,7 @@
 
 Masha::Masha() {
 
+	m_identifier = 2;
 	// Свяжем текстуру со спрайтом
 	m_Sprite = sf::Sprite(AssetManager::GetTexture("graphics/mascha.png"));
 	m_JumpDuration = .4;

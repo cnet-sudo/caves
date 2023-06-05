@@ -95,6 +95,11 @@ sf::FloatRect Character::getLeft() {
 	return m_Left;
 }
 
+int Character::getIdentifier()
+{
+	return m_identifier;
+}
+
 sf::FloatRect Character::getRight() {
 
 	return m_Right;

@@ -2,6 +2,7 @@
 
 Bear::Bear() {
 
+	m_identifier = 1;
 	// Свяжем текстуру со спрайтом
 	m_Sprite = sf::Sprite(AssetManager::GetTexture("graphics/bear.png"));
 	m_JumpDuration = .45;

@@ -3,6 +3,7 @@
 
 class Masha : public Character
 {
+	
 public:
 	// конструктор медведя
 	Masha();

@@ -2,7 +2,7 @@
 #include <sstream>
 #include <fstream>
 
-int** LevelManager::nextLevel(sf::VertexArray& rVaLevel) {
+void LevelManager::nextLevel(std::vector<std::vector<int>> & matrix, sf::VertexArray& rVaLevel) {
 	m_LevelSize.x = 0;
 	m_LevelSize.y = 0;
 	// следующий уровень
@@ -54,25 +54,19 @@ int** LevelManager::nextLevel(sf::VertexArray& rVaLevel) {
 	// Вернуться к началу файла
 	inputFile.clear();
 	inputFile.seekg(0, std::ios::beg);
-	// Подготавливаем 2D-массив для хранения значений int из файла в int**
-	int** arrayLevel = new int* [m_LevelSize.y];
-	for (int i = 0; i < m_LevelSize.y; ++i)
-	{
-		// Добавляем новый массив в каждый элемент
-		arrayLevel[i] = new int[m_LevelSize.x];
-	}
-
 	// Проходим по файлу и сохраняем 
 	// все значения в массиве 2d
 	std::string row;
 	int y = 0;
 	while (inputFile >> row)
 	{
+		std::vector<int> v;
 		for (int x = 0; x < row.length(); x++) {
-			const char val = row[x];
-			arrayLevel[y][x] = atoi(&val);
+						
+			std::string s(1, row[x]);
+			v.push_back(std::stoi(s));
 		}
-		y++;
+		matrix.push_back(v);
 	}
 	// Закрыть файл
 	inputFile.close();
@@ -92,7 +86,7 @@ int** LevelManager::nextLevel(sf::VertexArray& rVaLevel) {
 			rVaLevel[currentVertex + 2].position =sf::Vector2f((x * TILE_SIZE) + TILE_SIZE,(y * TILE_SIZE) + TILE_SIZE);
 			rVaLevel[currentVertex + 3].position =sf::Vector2f((x * TILE_SIZE),(y * TILE_SIZE) + TILE_SIZE);
 			// Какой тайл из листа спрайтов мы должны использовать
-			int verticalOffset = arrayLevel[y][x] * TILE_SIZE;
+			int verticalOffset = matrix[y][x] * TILE_SIZE;
 			rVaLevel[currentVertex + 0].texCoords =	sf::Vector2f(0+ verticalOffset, 0 );
 			rVaLevel[currentVertex + 1].texCoords =	sf::Vector2f(0 + verticalOffset,TILE_SIZE);
 			rVaLevel[currentVertex + 2].texCoords =	sf::Vector2f(TILE_SIZE + verticalOffset,TILE_SIZE);
@@ -101,7 +95,7 @@ int** LevelManager::nextLevel(sf::VertexArray& rVaLevel) {
 			currentVertex = currentVertex + VERTS_IN_QUAD;
 		}
 	}
-	return arrayLevel;
+	
 } 
 
 sf::Vector2i LevelManager::getLevelSize()
