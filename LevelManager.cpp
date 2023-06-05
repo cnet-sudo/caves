@@ -2,19 +2,13 @@
 #include <sstream>
 #include <fstream>
 
-void LevelManager::nextLevel(std::vector<std::vector<int>> & matrix, sf::VertexArray& rVaLevel) {
+void LevelManager::nextLevel(std::vector<std::vector<int>> & matrix, sf::VertexArray& rVaLevel, int level) {
 	m_LevelSize.x = 0;
 	m_LevelSize.y = 0;
-	// следующий уровень
-	m_CurrentLevel++;
-	if (m_CurrentLevel > NUM_LEVELS)
-	{
-		m_CurrentLevel = 1;
-		m_TimeModifier -= .1f;
-	}
+	
 	// загрузка уровня
 	std::string levelToLoad;
-	switch (m_CurrentLevel)
+	switch (level)
 	{
 	case 1:
 		levelToLoad = "levels/level1.txt";
@@ -103,10 +97,6 @@ sf::Vector2i LevelManager::getLevelSize()
 	return m_LevelSize;
 }
 
-int LevelManager::getCurrentLevel()
-{
-	return m_CurrentLevel;
-}
 
 float LevelManager::getTimeLimit()
 {

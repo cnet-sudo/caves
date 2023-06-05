@@ -11,8 +11,6 @@ class LevelManager
 	float m_TimeModifier = 1;
 	// немодифицированный интервал времени
 	float m_BaseTimeLimit = 0;
-	// текущий уровень
-	int m_CurrentLevel = 0;
 	// когда нужно вернуться на уровень 1
 	const int NUM_LEVELS = 4;
 
@@ -24,8 +22,8 @@ public:
 	float getTimeLimit();
 	sf::Vector2f getStartPosition();
 	// построение уровня
-	void nextLevel(std::vector<std::vector<int>>& matrix,sf::VertexArray& rVaLevel);
+	void nextLevel(std::vector<std::vector<int>>& matrix,sf::VertexArray& rVaLevel,int level);
 	sf::Vector2i getLevelSize();
-	int getCurrentLevel();
+	
 };
 

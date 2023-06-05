@@ -2,6 +2,7 @@
 
 GameEngine::GameEngine()
 {
+	m_level = 1;
 	// получаем разрешение экрана
 	sf::Vector2f resolution;
 	resolution.x = sf::VideoMode::getDesktopMode().width;
@@ -106,6 +107,7 @@ void GameEngine::update(float dtAsSeconds)
 		{
 			// Требуется новый уровень
 			m_NewLevelRequired = true;
+			m_level++;
 			m_SM.playReachGoal();
 		}
 		else
@@ -181,7 +183,7 @@ void GameEngine::update(float dtAsSeconds)
 		// Обновляем время
 		m_Hud.setTime(m_TimeRemaining);
 		// Обновляем уровень 
-		m_Hud.setLevel(m_LM.getCurrentLevel());
+		m_Hud.setLevel(m_level);
 		m_FramesSinceLastHUDUpdate = 0;
 	}
 
@@ -306,7 +308,7 @@ void GameEngine::loadLevel()
 	if (!m_matrix.empty()) m_matrix.clear();
 	// Загружаем следующий массив 2d с картой для уровня 
 	// И снова заполняем массив вершин
-	m_LM.nextLevel(m_matrix,m_VALevel);
+	m_LM.nextLevel(m_matrix,m_VALevel,m_level);
 	// Подготовить излучатели звука
 	populateEmitters(m_FireEmitters);
 	// Сколько длится этот новый лимит времени

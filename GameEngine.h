@@ -85,7 +85,7 @@ private:
 
 	// Загружаем новый уровень
 	void loadLevel();
-
+	int m_level;
 	bool detectCollisions(Character& character);
 
 	// Создаем вектор мест для воспроизведения звука 
